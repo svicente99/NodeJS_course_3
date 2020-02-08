@@ -23,6 +23,37 @@ var promoRouter = require('./routes/promoRouter');
 
 var app = express();
 
+
+// Basic Authentication
+
+function auth (req, res, next) {
+  console.log(req.headers);
+  var authHeader = req.headers.authorization;
+  if (!authHeader) {
+  console.log("nao autenticado");
+      var err = new Error('You are not authenticated!');
+      res.setHeader('WWW-Authenticate', 'Basic');
+      err.status = 401;
+      next(err);
+      return;
+  }
+
+  var auth = new Buffer.from(authHeader.split(' ')[1], 'base64').toString().split(':');
+  var user = auth[0];
+  var pass = auth[1];
+  if (user == 'admin' && pass == 'password') {
+      next(); // authorized
+  } else {
+      var err = new Error('You are not authenticated!');
+      res.setHeader('WWW-Authenticate', 'Basic');      
+      err.status = 401;
+      next(err);
+  }
+}
+
+console.log("using new app with authentication");
+app.use(auth);
+
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
@@ -56,36 +87,6 @@ app.use(function(err, req, res, next) {
   res.status(err.status || 500);
   res.render('error');
 });
-
-// Basic Authentication
-
-function auth (req, res, next) {
-  console.log(req.headers);
-  var authHeader = req.headers.authorization;
-  if (!authHeader) {
-  console.log("nao autenticado");
-      var err = new Error('You are not authenticated!');
-      res.setHeader('WWW-Authenticate', 'Basic');
-      err.status = 401;
-      next(err);
-      return;
-  }
-
-  var auth = new Buffer.from(authHeader.split(' ')[1], 'base64').toString().split(':');
-  var user = auth[0];
-  var pass = auth[1];
-  if (user == 'admin' && pass == 'password') {
-      next(); // authorized
-  } else {
-      var err = new Error('You are not authenticated!');
-      res.setHeader('WWW-Authenticate', 'Basic');      
-      err.status = 401;
-      next(err);
-  }
-}
-
-console.log("using new app");
-app.use(auth);
 
 
 module.exports = app;
