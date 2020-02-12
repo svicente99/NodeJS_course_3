@@ -1,7 +1,6 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
-const authenticate = require('../authenticate');
 
 const Leaders = require('../models/leaders');
 
@@ -20,7 +19,7 @@ leadRouter.route('/')
 		 (err) => next(err))
 		.catch( (err) => next(err) );
 	})
-	.post(authenticate.verifyUser, (req, res, next) => {
+	.post((req, res, next) => {
 		Leaders.create(req.body)
 		.then((leader) => {
 			console.log("Leader created: ", leader);
@@ -31,11 +30,11 @@ leadRouter.route('/')
 		 (err) => next(err))
 		.catch( (err) => next(err) );
 	})
-	.put(authenticate.verifyUser, (req, res, next) => {
+	.put((req, res, next) => {
 		res.statusCode = 403;
 		res.end('PUT operation not supported on /leaders');
 	})
-	.delete(authenticate.verifyUser, (req, res, next) => {
+	.delete((req, res, next) => {
 		Leaders.remove({})
 		.then((resp) => {
 			console.log("Leaders removed");
@@ -62,11 +61,11 @@ leadRouter.route('/:leaderID')
 		 (err) => next(err))
 		.catch( (err) => next(err) );
 	})
-	.post(authenticate.verifyUser, (req, res, next) => {
+	.post((req, res, next) => {
 	  	res.statusCode = 403;
 	  	res.end('POST operation not supported on /leaders/'+ req.params.leaderID);
 	})
-	.put(authenticate.verifyUser, (req, res, next) => {
+	.put((req, res, next) => {
 		Leaders.findByIdAndUpdate(req.params.leaderID, {
 			$set: req.body
 		}, { new: true })
@@ -79,7 +78,7 @@ leadRouter.route('/:leaderID')
 		 (err) => next(err))
 		.catch( (err) => next(err) );
 	})
-	.delete(authenticate.verifyUser, (req, res, next) => {
+	.delete((req, res, next) => {
 		Leaders.findByIdAndRemove(req.params.leaderID)
 		.then((resp) => {
 			res.statusCode = 200;
@@ -114,12 +113,12 @@ leadRouter.route('/:leaderID/comments/:commentId')
 		}, (err) => next(err))
 		.catch((err) => next(err));
 	})
-	.post(authenticate.verifyUser, (req, res, next) => {
+	.post((req, res, next) => {
 		res.statusCode = 403;
 		res.end('POST operation not supported on /leaders/'+ req.params.leaderID
 		    + '/comments/' + req.params.commentId);
 	})
-	.put(authenticate.verifyUser, (req, res, next) => {
+	.put((req, res, next) => {
 		Leaders.findById(req.params.leaderID)
 		.then((leader) => {
 		    if (leader != null && leader.comments.id(req.params.commentId) != null) {
@@ -149,7 +148,7 @@ leadRouter.route('/:leaderID/comments/:commentId')
 		}, (err) => next(err))
 		.catch((err) => next(err));
 	})
-	.delete(authenticate.verifyUser, (req, res, next) => {
+	.delete((req, res, next) => {
 		Leaders.findById(req.params.leaderID)
 		.then((leader) => {
 		    if (leader != null && leader.comments.id(req.params.commentId) != null) {

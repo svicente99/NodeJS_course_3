@@ -1,25 +1,21 @@
-var express = require('express');
-var router = express.Router();
-
+const express = require('express');
 const bodyParser = require('body-parser');
-var User = require("../models/users");
+const mongoose = require('mongoose');
 
-router.use(bodyParser.json);
+var Users = require('../models/users');
+var passport = require('passport');
+
+var router = express.Router();
+router.use(bodyParser.json());
 
 /* GET users listing. */
-/****
 router.get('/', function(req, res, next) {
-  console.log("general address");
-  res.send('respond with a resource');
+  res.send("Hello World! Users come in ...");
 });
 
-****/
-router.get('/', (req,res) => res.send("Hello World") 
-          );
-
 router.post('/signup', (req, res, next) => {
-  console.log("..........signup user............");
-  User.findOne({username: req.body.username})
+  ////console.log("..........signup a user............");
+  Users.findOne({username: req.body.username})
   .then((user) => {
     if(user != null) {
       var err = new Error('User ' + req.body.username + ' already exists!');
@@ -27,7 +23,7 @@ router.post('/signup', (req, res, next) => {
       next(err);
     }
     else {
-      return User.create({
+      return Users.create({
         username: req.body.username,
         password: req.body.password});
     }
@@ -56,7 +52,7 @@ router.post('/login', (req, res, next) => {
     var username = auth[0];
     var password = auth[1];
   
-    User.findOne({username: username})
+    Users.findOne({username: username})
     .then((user) => {
       if (user === null) {
         var err = new Error('User ' + username + ' does not exist!');
