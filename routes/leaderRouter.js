@@ -10,7 +10,7 @@ const leadRouter = express.Router();
 leadRouter.use(bodyParser.json());
 
 leadRouter.route('/')
-	.get((req,res,next) => {
+	.get(authenticate.verifyOrdinaryUser, (req,res,next) => {
 		Leaders.find({})
 		.then((leaders) => {
 			res.statusCode = 200;
@@ -20,7 +20,7 @@ leadRouter.route('/')
 		 (err) => next(err))
 		.catch( (err) => next(err) );
 	})
-	.post(authenticate.verifyUser, (req, res, next) => {
+	.post(authenticate.verifyOrdinaryUser, authenticate.verifyAdmin, function(req, res, next) {
 		Leaders.create(req.body)
 		.then((leader) => {
 			console.log("Leader created: ", leader);
@@ -31,11 +31,11 @@ leadRouter.route('/')
 		 (err) => next(err))
 		.catch( (err) => next(err) );
 	})
-	.put(authenticate.verifyUser, (req, res, next) => {
+	.put(authenticate.verifyOrdinaryUser, (req, res, next) => {
 		res.statusCode = 403;
 		res.end('PUT operation not supported on /leaders');
 	})
-	.delete(authenticate.verifyUser, (req, res, next) => {
+	.delete(authenticate.verifyOrdinaryUser, authenticate.verifyAdmin, (req, res, next) => {
 		Leaders.remove({})
 		.then((resp) => {
 			console.log("Leaders removed");
@@ -51,7 +51,7 @@ leadRouter.route('/')
 // ---------------------------------------------------
 
 leadRouter.route('/:leaderID')
-	.get((req,res,next) => {
+	.get(authenticate.verifyOrdinaryUser, (req,res,next) => {
 		Leaders.findById(req.params.leaderID)
 		.then((leader) => {
 			res.statusCode = 200;
@@ -62,11 +62,11 @@ leadRouter.route('/:leaderID')
 		 (err) => next(err))
 		.catch( (err) => next(err) );
 	})
-	.post(authenticate.verifyUser, (req, res, next) => {
+	.post(authenticate.verifyOrdinaryUser, (req, res, next) => {
 	  	res.statusCode = 403;
 	  	res.end('POST operation not supported on /leaders/'+ req.params.leaderID);
 	})
-	.put(authenticate.verifyUser, (req, res, next) => {
+	.put(authenticate.verifyOrdinaryUser, authenticate.verifyAdmin, (req, res, next) => {
 		Leaders.findByIdAndUpdate(req.params.leaderID, {
 			$set: req.body
 		}, { new: true })
@@ -79,7 +79,7 @@ leadRouter.route('/:leaderID')
 		 (err) => next(err))
 		.catch( (err) => next(err) );
 	})
-	.delete(authenticate.verifyUser, (req, res, next) => {
+	.delete(authenticate.verifyOrdinaryUser, authenticate.verifyAdmin, (req, res, next) => {
 		Leaders.findByIdAndRemove(req.params.leaderID)
 		.then((resp) => {
 			res.statusCode = 200;
@@ -90,90 +90,6 @@ leadRouter.route('/:leaderID')
 		 (err) => next(err))
 		.catch( (err) => next(err) );
 	})
-
-
-leadRouter.route('/:leaderID/comments/:commentId')
-	.get((req,res,next) => {
-		Leaders.findById(req.params.leaderID)
-		.then((leader) => {
-		    if (leader != null && leader.comments.id(req.params.commentId) != null) {
-		        res.statusCode = 200;
-		        res.setHeader('Content-Type', 'application/json');
-		        res.json(leader.comments.id(req.params.commentId));
-		    }
-		    else if (leader == null) {
-		        err = new Error('Leader ' + req.params.leaderID + ' not found');
-		        err.status = 404;
-		        return next(err);
-		    }
-		    else {
-		        err = new Error('Comment ' + req.params.commentId + ' not found');
-		        err.status = 404;
-		        return next(err);            
-		    }
-		}, (err) => next(err))
-		.catch((err) => next(err));
-	})
-	.post(authenticate.verifyUser, (req, res, next) => {
-		res.statusCode = 403;
-		res.end('POST operation not supported on /leaders/'+ req.params.leaderID
-		    + '/comments/' + req.params.commentId);
-	})
-	.put(authenticate.verifyUser, (req, res, next) => {
-		Leaders.findById(req.params.leaderID)
-		.then((leader) => {
-		    if (leader != null && leader.comments.id(req.params.commentId) != null) {
-		        if (req.body.rating) {
-		            leader.comments.id(req.params.commentId).rating = req.body.rating;
-		        }
-		        if (req.body.comment) {
-		            leader.comments.id(req.params.commentId).comment = req.body.comment;                
-		        }
-		        leader.save()
-		        .then((leader) => {
-		            res.statusCode = 200;
-		            res.setHeader('Content-Type', 'application/json');
-		            res.json(leader);                
-		        }, (err) => next(err));
-		    }
-		    else if (leader == null) {
-		        err = new Error('Leader ' + req.params.leaderID + ' not found');
-		        err.status = 404;
-		        return next(err);
-		    }
-		    else {
-		        err = new Error('Comment ' + req.params.commentId + ' not found');
-		        err.status = 404;
-		        return next(err);            
-		    }
-		}, (err) => next(err))
-		.catch((err) => next(err));
-	})
-	.delete(authenticate.verifyUser, (req, res, next) => {
-		Leaders.findById(req.params.leaderID)
-		.then((leader) => {
-		    if (leader != null && leader.comments.id(req.params.commentId) != null) {
-		        leader.comments.id(req.params.commentId).remove();
-		        leader.save()
-		        .then((leader) => {
-		            res.statusCode = 200;
-		            res.setHeader('Content-Type', 'application/json');
-		            res.json(leader);                
-		        }, (err) => next(err));
-		    }
-		    else if (leader == null) {
-		        err = new Error('Leader ' + req.params.leaderID + ' not found');
-		        err.status = 404;
-		        return next(err);
-		    }
-		    else {
-		        err = new Error('Comment ' + req.params.commentId + ' not found');
-		        err.status = 404;
-		        return next(err);            
-		    }
-		}, (err) => next(err))
-		.catch((err) => next(err));
-	});
 
 // --------------------------------------------------------------------------------------
 

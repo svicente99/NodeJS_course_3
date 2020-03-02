@@ -6,15 +6,23 @@ var User = require('../models/users');
 var passport = require('passport');
 var authenticate = require('../authenticate');
 
-var router = express.Router();
-router.use(bodyParser.json());
+const userRouter = express.Router();
+userRouter.use(bodyParser.json());
 
 /* GET users listing. */
-router.get('/', function(req, res, next) {
-  res.send("Hello World! Users come in ...");
-});
+userRouter.route('/')
+	.get(authenticate.verifyOrdinaryUser, authenticate.verifyAdmin, (req,res,next) => {
+		User.find({})
+		.then((users) => {
+			res.statusCode = 200;
+			res.setHeader('Content-Type', 'application/json');
+			res.json(users);
+		},
+		 (err) => next(err))
+		.catch( (err) => next(err) );
+	});
 
-router.post('/signup', (req, res, next) => {
+userRouter.post('/signup', (req, res, next) => {
 	User.register(new User( {username: req.body.username}), 
       req.body.password, (err,user) => {
    		if(err) {
@@ -32,19 +40,20 @@ router.post('/signup', (req, res, next) => {
 	  });
 });
 
-router.post('/login', passport.authenticate('local'), (req, res) => {
+userRouter.post('/login', passport.authenticate('local'), (req, res) => {
   var token = authenticate.getToken({_id: req.user._id});
 
   res.statusCode = 200;
   res.setHeader('Content-Type', 'application/json');
-  res.json({success: true, token: token, status: 'You are successfully logged in!'});
+  res.json({success: true, administrator: req.user.admin?'yes':'no', token: token, status: 'You are successfully logged in!'});
 });
 
-router.get('/logout', (req, res, next) => {
+userRouter.get('/logout', (req, res, next) => {
   if (req.session) {
     req.session.destroy();
     res.clearCookie('session-id');
-    res.redirect('/');
+    res.send("You are successfully logged out.");
+    //res.redirect('/');
   }
   else {
     var err = new Error('You are not logged in!');
@@ -53,4 +62,4 @@ router.get('/logout', (req, res, next) => {
   }
 });
 
-module.exports = router;
+module.exports = userRouter;
