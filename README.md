@@ -1,7 +1,7 @@
-# NodeJS_course_2
-Peer assigment #2 to NodeJS Coursera - REST API with Express, MongoDB and Mongoose
+# NodeJS_course_3
+Peer assigment #3 to NodeJS Coursera - User Authentication with Passport
 
-See "instructions2.html" to better understanding of this exercise.
+See "instructions3.html" to better understanding of this exercise.
 
 ----
 
