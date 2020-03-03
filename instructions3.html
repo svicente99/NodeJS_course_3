@@ -1,0 +1,134 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<head>
+	<meta http-equiv="content-type" content="text/html; charset=utf-8"/>
+	<title>Instructions - Assignment 2</title>
+	<meta name="generator" content="LibreOffice 5.1.6.2 (Linux)"/>
+	<meta name="created" content="00:00:00"/>
+	<meta name="changed" content="2020-03-02T23:16:28.195784236"/>
+	<meta name="created" content="2020-02-03T00:54:58.125188764">
+	<meta name="changed" content="2020-02-03T00:55:53.824188175">
+	<style type="text/css">
+		@page { margin: 2cm }
+		p { margin-bottom: 0.25cm; line-height: 120% }
+	</style>
+</head>
+<body lang="pt-BR" dir="ltr">
+<p><font size="4" style="font-size: 14pt"><b>INSTRUCTIONS</b></font></p>
+<p><br/>
+<br/>
+
+</p>
+<p>In this assignment you will continue the exploration of user
+authentication. We have already set up the REST API server to
+validate an ordinary user. Now, you will extend this to verify an
+Admin and grant appropriate privileges to an Admin. In addition you
+will allow only a registered user to update and delete his/her
+submitted comments. Neither another user, nor an Admin can edit these
+comments.</p>
+<p><br/>
+<br/>
+
+</p>
+<p>Step-By-Step Assignment Instructions</p>
+<p><strong>Assignment Overview</strong></p>
+<p>At the end of this assignment, you would have completed the
+following:</p>
+<ul>
+	<li/>
+<p style="margin-bottom: 0cm">Check if a verified ordinary
+	user also has Admin privileges.</p>
+	<li/>
+<p style="margin-bottom: 0cm">Allow any one to perform GET
+	operations</p>
+	<li/>
+<p style="margin-bottom: 0cm">Allow only an Admin to perform
+	POST, PUT and DELETE operations</p>
+	<li/>
+<p style="margin-bottom: 0cm">Allow an Admin to be able to GET
+	all the registered users' information from the database</p>
+	<li/>
+<p>Allow a registered user to submit comments (already
+	completed), update a submitted comment and delete a submitted
+	comment. The user should be restricted to perform such operations
+	only on his/her own comments. No user or even the Admin can edit or
+	delete the comments submitted by other users.</p>
+</ul>
+<p><br/>
+<br/>
+
+</p>
+<p><strong><u>Assignment Requirements</u></strong></p>
+<p><br/>
+<br/>
+
+</p>
+<p><strong><span style="font-weight: normal">This assignment is
+divided into three tasks as detailed below:</span></strong></p>
+<p><strong><font color="#3333ff">Task 1</font></strong></p>
+<p><strong><span style="font-weight: normal">In this task you will
+implement a new function named </span></strong><strong><em><span style="font-weight: normal">verifyAdmin()
+</span></em></strong><strong><span style="font-weight: normal">in
+</span></strong><strong><em><span style="font-weight: normal">authenticate.js</span></em></strong><strong><span style="font-weight: normal">
+file. This function will check an ordinary user to see if s/he has
+Admin privileges. In order to perform this check, note that all users
+have an additional field stored in their records named </span></strong><strong><em><span style="font-weight: normal">admin</span></em></strong><strong><span style="font-weight: normal">,
+that is a boolean flag, set to </span></strong><strong><em><span style="font-weight: normal">false</span></em></strong><strong><span style="font-weight: normal">
+by default. Furthermore, when the user's token is checked in
+</span></strong><strong><em><span style="font-weight: normal">verifyOrdinaryUser()</span></em></strong><strong><span style="font-weight: normal">
+function, it will load a new property named </span></strong><strong><em><span style="font-weight: normal">user</span></em></strong><strong><span style="font-weight: normal">
+to the </span></strong><strong><em><span style="font-weight: normal">request</span></em></strong><strong><span style="font-weight: normal">
+object. This will be available to you if the </span></strong><strong><em><span style="font-weight: normal">verifyAdmin()</span></em></strong><strong><span style="font-weight: normal">
+follows </span></strong><strong><em><span style="font-weight: normal">verifyUser()</span></em></strong><strong><span style="font-weight: normal">
+in the middleware order in Express. From this </span></strong><strong><em><span style="font-weight: normal">req</span></em></strong><strong><span style="font-weight: normal">
+object, you can obtain the admin flag of the user's information by
+using the following expression:</span></strong></p>
+<p>You can use this to decide if the user is an administrator. The
+<em>verifyAdmin() </em>function will call <em>next();</em> if the
+user is an Admin, otherwise it will return next(err); If an ordinary
+user performs this operation, you should return an error by calling
+next(err) with the status of 403, and a message &quot;You are not
+authorized to perform this operation!&quot;.</p>
+<p><strong>Note: See the video on how to set up an Admin account</strong></p>
+<p><strong><font color="#3333ff">Task2</font></strong></p>
+<p>In this task you will update all the routes in the REST API to
+ensure that only the Admins can perform POST, PUT and DELETE
+operations. Update the code for all the routers to support this.
+These operations should be supported for the following end points:</p>
+<ul>
+	<li/>
+<p style="margin-bottom: 0cm">POST, PUT and DELETE operations
+	on /dishes and /dishes/:dishId</p>
+	<li/>
+<p style="margin-bottom: 0cm">DELETE operation on
+	/dishes/:dishId/comments</p>
+	<li/>
+<p style="margin-bottom: 0cm">POST, PUT and DELETE operations
+	on /promotions and /promotions/:promoId</p>
+	<li/>
+<p>POST, PUT and DELETE operations on /leaders and
+	/leaders/:leaderId</p>
+</ul>
+<p><strong><font color="#3333ff">Task 3</font></strong></p>
+<p>In this task you will now activate the /users REST API end point.
+When an Admin sends a GET request to <a href="http://localhost:3000/users" target="_blank">http://localhost:3000/users</a>
+you will return the details of all the users. Ordinary users are
+forbidden from performing this operation.</p>
+<p><strong><font color="#3333ff">Task 4</font></strong></p>
+<p>In this task you will allow a registered user to update or delete
+his/her own comment. Recall that the comment already stores the
+author's ID. When a user performs a PUT or DELETE operation on the
+/dishes/:dishId/comments/:commentId REST API end point, you will
+check to ensure that the user performing the operation is the same as
+the user that submitted the comment. You will allow the operation to
+be performed only if the user's ID matches the id of the comment's
+author. Note that the User's ID is available from the <em>req.user</em>
+property of the <em>req</em> object. Also ObjectIDs behave like
+Strings, and hence when comparing two ObjectIDs, you should use the
+<em>Id1.equals(id2)</em> syntax.</p>
+<p><br/>
+<br/>
+
+</p>
+</body>
+</html>
